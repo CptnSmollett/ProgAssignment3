@@ -1,13 +1,3 @@
-## This script does following
-
-## 1. Merges the training and the test sets to create one data set.
-## 2. Extracts only the measurements on the mean and standard deviation for each
-##    measurement. 
-## 3. Uses descriptive activity names to name the activities in the data set
-## 4. Appropriately labels the data set with descriptive variable names. 
-## 5. From the data set in step 4, creates a second, independent tidy data set
-##    with the average of each variable for each activity and each subject.
-
 ## Warning! This script tested in Windows environment only!
 
 
@@ -15,12 +5,23 @@
 ## data set description:
 ## http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
+## The entry point to raw data transformation algorithm.
+## Automatically downloads raw data and merges subsets into single data set for
+## further analysis.
+## This function algorithm explained on code book: https://github.com/CptnSmollett/ProgAssignment3/blob/master/CodeBook.md
+## Value: character vector of length 1 with path to dataset folder.
+## Params:
+##      downloadDataIfMissing - boolean value telling if missing data should be
+##          automatically downloaded. Default value is TRUE.
+##      mergeDataIfMissing - boolean value telling if missing data should be
+##          automatically merged. Default value is TRUE.
 run_analysis <- function(downloadDataIfMissing = TRUE,
                          mergeDataIfMissing = TRUE) {
     library(LaF)
     library(data.table)
     
     dataRootPath <- "./data"
+    if (!file.exists(dataRootPath)) { dir.create(dataRootPath) }
 
     # get data path, automatically downloads data if said so
     rawDataPath <- getData(dataRootPath, downloadDataIfMissing)
@@ -41,22 +42,6 @@ run_analysis <- function(downloadDataIfMissing = TRUE,
     tidyDataset <- createTidyDataset(measurements, mergedFiles)
     
     tidyDataset
-    
-    # Check for data in './data/UCI HAR dataset' folder and download it automatically if needed
-    # Merge train and test dataset file pairs (/test/X_test.txt, /train/X_train.txt),
-    # (/test/Y_test.txt, /train/y_train.txt), (/test/subject_test.txt, /train/subject_train.txt)
-    # into /merged/X.txt, /merged/Y.txt and /merged/subject.txt
-    # Use features.txt as column names
-    # Extract from data frame (table?) columns with names like '*-mean()*' or '*-std()*'
-    # Use which() to extract indices for those columns
-    # Don't forget to use column names
-    # Add activities to the dataset, apply names from activities.txt to /merged/Y.txt
-    
-    # read subject ids from subject_train.txt and subject_test.txt
-    # join it the output
-    # based on result create another dataset with means grouped by activity name and subject id
-    #   use factors for this
-    #   look for [,,] operator and its grouping capabilities
 }
 
 ## This function checks if data exists and creates dataset if needed.
@@ -64,8 +49,8 @@ run_analysis <- function(downloadDataIfMissing = TRUE,
 ## Params:
 ##      dataRootPath - character vector of length 1 containing path to data directory
 ##      downloadDataIfMissing - boolean value telling if missing data should be
-##         automatically downloaded. Default value is FALSE.
-getData <- function(dataRootPath, downloadDataIfMissing = FALSE) {
+##         automatically downloaded. Default value is TRUE.
+getData <- function(dataRootPath, downloadDataIfMissing = TRUE) {
     datasetDir <-  paste(dataRootPath, "UCI HAR dataset", sep = "/")
     downloadUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
     destFile <- paste(dataRootPath, "getdata projectfiles UCI HAR Dataset.zip", sep = "/")
@@ -100,9 +85,8 @@ getData <- function(dataRootPath, downloadDataIfMissing = FALSE) {
 ##      rawDataPath - character vector of length 1 conttaining full path to
 ##          raw data folder
 ##      mergeDataIfMissing - boolean value telling if missing data should be
-##          automatically merged. Default value is FALSE.
-mergeDatasets <- function(dataRootPath, rawDataPath, mergeDataIfMissing = FALSE
-                          ,n = 100) {
+##          automatically merged. Default value is TRUE.
+mergeDatasets <- function(dataRootPath, rawDataPath, mergeDataIfMissing = TRUE) {
     mergedPath <- paste(dataRootPath, "merged", sep = "/")
     testDatasetPath <- paste(rawDataPath, "test", sep = "/")
     trainDatasetPath <- paste(rawDataPath, "train", sep = "/")
